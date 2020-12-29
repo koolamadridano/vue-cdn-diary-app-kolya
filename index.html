@@ -72,7 +72,7 @@
         var app = new Vue({
             el: '#app',
             data: {
-                baseUrl: 'http://www.diaryapi.somee.com/',
+                baseURL: 'https://www.diaryapi.somee.com/',
                 loginPayload: {
                     hasError: false,
                     username: null,
@@ -83,11 +83,11 @@
             },
             methods: {
                 handleLogin: function() {
-                    axios.post(this.baseUrl + `TOKEN?username=${this.loginPayload.username}&password=${this.loginPayload.password}`)
-                        .then(res => {
+                    axios.post(this.baseURL + `TOKEN?username=${this.loginPayload.username}&password=${this.loginPayload.password}`)
+                    .then(res => {
                             this.localStorage = res.data;
                             localStorage.setItem("diaryLocalStorage", JSON.stringify(this.localStorage));
-                                axios.get(this.baseUrl + `api/profile/findBySpecialId/${this.localStorage?.userId}`)
+                                axios.get(this.baseURL + `api/profile/findBySpecialId/${this.localStorage?.userId}`)
                                     .then(res => {
                                         let profile = res.data;
                                         if(profile.length > 0) return location.href="src/profile.html";

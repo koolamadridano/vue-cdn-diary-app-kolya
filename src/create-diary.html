@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.6.5/dist/css/uikit.min.css" />
+    <link rel="stylesheet" href="css/app.css">
+    <title>Write diary</title>
+</head>
+<body>
+    <div id="app">
+        <div class="container">
+            <div class="row justify-content-center" style="margin-top: 100px">
+                <div class="col-md-5">
+                    <div class="d-flex align-items-center pointer position-absolute " @click="redirectToProfile">
+                        <span uk-icon="icon: arrow-left; ratio: 1"></span>
+                        <span>&nbsp;Go back</span>
+                    </div>
+                    <form @submit.prevent="postDiary">
+                        <div class="uk-form-controls mt-5">
+                            <select class="uk-select" id="form-stacked-select"  v-model="diaryPayload.category">
+                                <option disabled :value="null">Category</option>
+                                <option value="Others">Others</option>
+                                <option value="Personal">Personal</option>
+                                <option value="School">School</option>
+                                <option value="Peers">Peers</option>
+                            </select>
+                        </div>
+                        <textarea 
+                            class="uk-textarea mt-2" 
+                            rows="10" 
+                            minlength="10"
+                            maxlength="255"
+                            placeholder="Write your diary"
+                            v-model="diaryPayload.content" required></textarea>
+                        <button type="submit" class="uk-button uk-button-primary mt-4">Post</button>
+                    </form>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.6.5/dist/js/uikit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.6.5/dist/js/uikit-icons.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script src="https://momentjs.com/downloads/moment-with-locales.min.js"></script>
+    <script>
+        var app = new Vue({
+         el: '#app',
+         data: {
+             title: 'Diary.me',
+             baseURL: 'https://www.diaryapi.somee.com/',
+             appId: 'diaryAppWebTech',
+             local: null,
+             diaryPayload: {
+                 category: null,
+                 content: null,
+                 postedBy: null
+             }
+         },
+          
+         methods: {
+            redirectToProfile: function() {
+                 location.href = 'profile.html';
+             },
+             postDiary: function(){
+                 if(this.local.userId) {
+                    let payload = {
+                        specialId: this.local.userId,
+                        category: this.diaryPayload.category ??= "Others",
+                        content: this.diaryPayload.content,
+                        datePosted: moment(Date.now()).format('LLL'),
+                        postedBy: this.diaryPayload.postedBy
+                    }
+                    axios.post(this.baseURL+'api/diary/create', payload)
+                        .then(res =>  location.href="feed.html")
+                        .catch(err => console.error(err));
+                 }
+             }
+         },
+         mounted: function() {
+             if(localStorage.diaryLocalStorage) {
+                this.local = JSON.parse(localStorage.diaryLocalStorage);
+                axios.get(this.baseURL + `api/profile/findBySpecialId/${this.local?.userId}`)
+                    .then(res => this.diaryPayload.postedBy = res.data[0].firstName)
+                    .catch(err => console.error(err));
+             }
+             if(!this.local) return location.href = '../index.html';
+         }
+     })
+    </script>
+</body>
+</html>

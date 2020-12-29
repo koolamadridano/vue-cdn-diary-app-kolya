@@ -12,17 +12,73 @@
         <link rel="stylesheet" href="css/app.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     </head>
+    <style>
+        .centerElement {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
 <body>
-    <div id="app">
-        <div class="container">
+    <div id="app"> 
+        <div uk-spinner="ratio: 3" class="centerElement" v-if="loading"></div>
+        <div class="container" v-if="!loading">
             <div class="row justify-content-center mt-5">
                 <div class="col-md-7">
-                    <h2 class="font-weight-normal  p-0 m-0" v-if="user">{{user?.lastName}}, {{user?.firstName}}</h2>
-                    <h6 class="font-weight-normal text-secondary p-0 m-0" v-if="user">{{user.address?.city}}, {{user.address?.country}}</h6>
-                    <h6 class="font-weight-normal text-secondary p-0 m-0" v-if="user">{{user?.course}}</h6>
-                    <h6 class="font-weight-normal text-secondary p-0 m-0" v-if="user">{{user?.birthDate}}</h6>
+                    <section v-if="!loading">
+                        <section class="d-flex justify-content-end">
+                            <span 
+                                uk-icon="icon: arrow-right; ratio:2" 
+                                class="pointer" 
+                                uk-toggle="target: #offcanvas-push"></span>
+                        </section>
+                        <section>
+                            <h2 class="font-weight-light p-0 m-0 text-dark">{{user?.lastName}}, {{user?.firstName}}</h2>
+                            <div class="text-secondary mt-2">{{user?.shortDescription}} </div>
+                            <div class="mt-2">
+                                <div>
+                                    <i class="fas fa-location-arrow mr-1  text-secondary"></i>
+                                    <span class="text-secondary">{{user?.address?.country}}, {{user?.address?.city}}</span>
+                                </div>
+                                <div>
+                                    <i class="fas fa-graduation-cap mr-1  text-secondary"></i>
+                                    <span class="text-secondary">{{user?.course}}</span>
+                                </div>
+                                <div>
+                                    <i class="fas fa-birthday-cake mr-1  text-secondary"></i>
+                                    <span class="text-secondary">{{user?.birthDate}}</span>
+                                </div>
+                            </div>
+                        </section>
+                    </section>
+                    <div id="offcanvas-push" uk-offcanvas="mode: push; overlay: true;flip: true" >
+                        <div class="uk-offcanvas-bar bg-secondary">
+                            <button class="uk-offcanvas-close" type="button" uk-close></button>
+                            <div style="margin-top: 150px;"></div>
+                            <h5 class="text-white font-weight-light pointer" @click="redirectToCreateDiary">
+                                <div class="d-flex justify-content-start">
+                                    <span>Write new diary&nbsp;</span>
+                                    <span uk-icon="icon:file-edit; ratio: 0.9" class="mt-1"></span>
+                                </div>
+                            </h5>
+                            <h5 class="text-white font-weight-light pointer" @click="redirectToFeed">
+                                <div class="d-flex justify-content-start">
+                                    <span>Feed&nbsp;</span>
+                                    <span uk-icon="icon:rss; ratio: 0.9" class="mt-1"></span>
+                                </div>
+                            </h5>
+                            <h3 class="font-weight-light mt-5 mb-2 blockquote">"{{quoteOfTheDay}}"</h3>
+                            <h5 class="text-white font-weight-light mt-5">
+                                <div class="d-flex justify-content-start pointer" @click="handleLogout">
+                                    <span>Sign-out&nbsp;</span>
+                                    <span uk-icon="icon: sign-out; ratio: 0.9" class="mt-1"></span>
+                                </div>
+                            </h5>
+                        </div>
+                    </div>
                     <iframe 
-                        style="margin-top: 150px"
+                        style="margin-top: 50px"
                         id="profileVideo" 
                         width="100%" 
                         height="345" 
@@ -30,6 +86,36 @@
                         frameborder="0" 
                         scrolling="no" 
                         uk-responsive uk-video="automute: true"></iframe>
+
+                    <div v-if="diaries.length > 0">
+                        <div v-for="(data, index) in diaries" class="mt-5 p-5">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="p-0 m-0">
+                                    <div class="d-flex align-items-center">
+                                        <span uk-icon="icon: hashtag"></span> 
+                                        <span><b>{{data.category}}</b></span>
+                                    </div>
+                                </h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-secondary mr-2"> 
+                                        <div class="d-flex align-items-center">
+                                            <span uk-icon="icon: calendar"></span> 
+                                            <span>&nbsp;{{data.datePosted}}</span>
+                                        </div>
+                                    </span>
+                                    <span uk-icon="icon: trash; ratio: 1" class="text-danger pointer" @click="handleDelete(data.id)"></span>
+                                </div>
+                            </div>
+                            <p class="text-secondary mt-2">{{data.content}}</p>
+                        </div>
+                    </div>
+                    <div v-else>
+                        <h4 class="text-center mt-5 blockquote"><em>Oops! It sounds like you don't have any posts, <br>Do you wish to 
+                            <b @click="redirectToCreateDiary" class="pointer">write</b> your first diary?</em>
+                        </h4>
+                    </div>
+                    <div style="margin-top: 100px"></div>
+                    <p class="text-center">&copy; KOLYA MADRIDANO</p>
                 </div>
             </div>
         </div>
@@ -48,11 +134,51 @@
             data: {
                 baseUrl: 'https://www.diaryapi.somee.com/',
                 user: {},
-
+                diaries: [],
+                quoteOfTheDay: null,
+                loading: true
             },
             methods: {
+                redirectToFeed: function() {
+                    return location.href = "feed.html";
+                },
+                redirectToCreateDiary: function() {
+                    return location.href = "create-diary.html";
+                },
+                handleLogout: function(){ 
+                    localStorage.removeItem('diaryLocalStorage');
+                    return location.href = "../index.html";
+                }, 
+                handleDelete: function(indexId) {
+                    console.log(indexId);
+                    axios.delete(this.baseUrl + `api/diary/remove/` + indexId)
+                        .then(res => {
+                            console.log(res.data);
+                            this.fetchDiaries();    
+                        })
+                        .catch(err => console.log(err))
+                },
+                fetchDiaries: function() {
+                    if(this.local.userId) {
+                        axios.get(this.baseUrl+`api/diary/findBySpecialId/${this.local?.userId}`)
+                            .then(res =>  {
+                                this.diaries = res.data.reverse();
+                                console.log(this.diaries);
+                            })
+                            .catch(err => console.error(err))
+                    }
+                },
                 componentDidMount: async function(){
                     if(this.local.userId) {
+                        await axios.get("https://quotes.rest/qod?language=en", {
+                            headers: {
+                                "accept": "application/json",
+                                "X-TheySaidSo-Api-Secret": "kolya"
+                            }
+                        }) 
+                        .then(res => this.quoteOfTheDay = res.data.contents.quotes[0].quote)
+                        .catch(err => console.log(err));
+                        
                         await axios.get(this.baseUrl+`api/profile/findBySpecialId/${this.local?.userId}`)
                             .then(res => {
                                 this.user = res.data[0];
@@ -63,17 +189,16 @@
                                 document.getElementById('profileVideo').src = `https://www.youtube.com/embed/${youtubeVideoId}?loop=1&autoplay=1&mute=1`;
                             })
                             .catch(err => console.log(err));
-                        await axios.get(this.baseUrl+`api/diary/findBySpecialId/${this.local?.userId}`)
-                            .then(res =>  this.diaries = res.data.reverse())
-                            .catch(err => console.error(err))
                     }
                 }
             },
             mounted: function() {
-                console.log(Date.parse('2000-06-21T00:00:00'));
                 if(localStorage.diaryLocalStorage) {
                     this.local = JSON.parse(localStorage.diaryLocalStorage);
                     this.componentDidMount();
+                    this.fetchDiaries();
+                    this.loading = false;
+
                 } else  location.href = "../index.html";
             }
         })

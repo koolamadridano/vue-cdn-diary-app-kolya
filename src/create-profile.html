@@ -151,8 +151,6 @@
                 handleCreate: function() {
                     var youtubeRegexp = /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$/;
                     let youTubeLink = this.createPayload.video;
-                    console.log(typeof this.createPayload.birthDate);
-                    let parseBirthdate = moment(Date.parse(this.createPayload.birthDate)).format('LL');
 
                     let payload = {
                         specialId: this.local.userId,
@@ -169,7 +167,7 @@
                             music: null,
                             video: this.createPayload.video
                         },
-                        birthDate: parseBirthdate
+                        birthDate: moment(Date.parse(this.createPayload.birthDate)).format('LL')
                     }
                     if(youTubeLink.match(youtubeRegexp)) {
                         this.loading = true;
