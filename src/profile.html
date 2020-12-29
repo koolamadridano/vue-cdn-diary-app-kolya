@@ -132,7 +132,7 @@
                                     <input type="file" name="files[]"    multiple>
                                     <input class="uk-input uk-form-width-medium" type="text" placeholder="Select to upload" disabled>
                                 </div>
-                                <button type="submit" class="uk-button uk-button-default">UPLOAD</button>
+                                <button type="submit" class="uk-button uk-button-default" :disabled="uploadIsDisabled">UPLOAD</button>
                             </form>
                         </div>
                     </section>
@@ -205,7 +205,8 @@
                 quoteOfTheDay: null,
                 loading: true,
                 uploadedBuffer: {},
-                gallery: []
+                gallery: [],
+                uploadIsDisabled: false
             },
             methods: {
                 redirectToFeed: function() {
@@ -215,6 +216,7 @@
                     return location.href = "create-diary.html";
                 },
                 uploadToCloud: async function() {
+                    this.uploadIsDisabled = true;
                     const form = document.querySelector("form");
                     const files = document.querySelector("[type=file]").files;
                     const formData = new FormData();
@@ -235,8 +237,14 @@
                                         datePosted: moment(Date.now()).format('LLL')
                                     }
                                     axios.post(this.baseUrl + 'api/gallery/upload',payload)
-                                        .then(res => this.handleFetchGallery())
-                                        .catch(err => console.log(err))
+                                        .then(res => {
+                                            this.handleFetchGallery();
+                                            this.uploadIsDisabled = false;
+                                        })
+                                        .catch(err => {
+                                            this.uploadIsDisabled = false;
+                                            console.log(err)
+                                        })
                                     }
                             })
                             .catch(err => console.log(err))
