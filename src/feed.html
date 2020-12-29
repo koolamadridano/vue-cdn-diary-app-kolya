@@ -8,17 +8,58 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.6.5/dist/css/uikit.min.css" />
     <link rel="stylesheet" href="css/app.css">
     <title>Feed</title>
+    <style> 
+        .textarea-style {
+            border: 1px solid rgba(0, 0, 0, 0.2);
+        }
+    </style>
 </head>
     <div id="app">
         <div class="container">
             <div class="row justify-content-center mt-5">
                 <div class="col-md-4">
-                    <div class="d-flex align-items-center pointer position-absolute" @click="returnToProfile">
-                        <span uk-icon="icon: arrow-left; ratio: 1"></span>
-                        <span>&nbsp;Go back</span>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center pointer" @click="returnToProfile">
+                            <span uk-icon="icon: arrow-left; ratio: 1"></span>
+                            <span>&nbsp;Go back</span>
+                        </div>
+                        <div>
+                            <span uk-icon="icon: settings; ratio:1;"  type="button"></span>
+                            <div uk-dropdown="mode: click; pos: bottom-justify">
+                                <ul class="uk-nav uk-dropdown-nav">
+                                    <li class="uk-active" aria-disabled="true">Filter by</li>
+                                    <li @click="filterBy('ALL')"><a href="#">All</a></li>
+                                    <li @click="filterBy('OTHERS')"><a href="#">Others</a></li>
+                                    <li @click="filterBy('PEERS')"><a href="#">Peers</a></li>
+                                    <li @click="filterBy('PERSONAL')"><a href="#">Personal</a></li>
+                                    <li @click="filterBy('SCHOOL')"><a href="#">School</a></li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
+                    <form @submit.prevent="handleWriteDiary">
+                        <textarea 
+                            class="uk-textarea mt-3 textarea-style"
+                            rows="4" 
+                            minlength="20"
+                            maxlength="255"
+                            placeholder="Write diary" 
+                            v-model="diaryPayload.content" required></textarea>
+                        <div class="d-flex justify-content-end mt-2">
+                            <div class="uk-form-controls">
+                                <select class="uk-select" id="form-stacked-select"  v-model="diaryPayload.category">
+                                    <option disabled :value="null">Category</option>
+                                    <option value="Others">Others</option>
+                                    <option value="Personal">Personal</option>
+                                    <option value="School">School</option>
+                                    <option value="Peers">Peers</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="uk-button uk-button-primary">Write</button>
+                        </div>
+                    </form>
                     <div style="margin-top: 100px"></div>
-                    <div v-for="(data, index) in diaries" class="mt-5">
+                    <div v-for="(data, index) in diaryBuffer" class="mt-5">
                         <div class="d-flex justify-content-between align-items-center">
                             <h6 class="p-0 m-0">
                                 <div class="d-flex align-items-center">
@@ -37,6 +78,10 @@
 
                         <p class="text-secondary uk-text-break p-3 mt-0">{{data.content}}</p>
                     </div>
+
+                    <div id="snackbar" style="background: #34A853;">
+                        <p class="p-3 m-0 font-weight-light">Posted successfully!</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -54,20 +99,81 @@
             data: {
                 baseUrl: 'https://www.diaryapi.somee.com/',
                 local: null,
-                diaries: []
+                diaries: [],
+                diaryBuffer: [],
+                diaryPayload: {
+                    category: null,
+                    content: null
+                },
+                diarySync: true,
+                user: {}
             },
             methods: {
                 returnToProfile: function() {
                     location.href = 'profile.html';
                 },
-                componentDidMount: async function() {
+                handleWriteDiary: function(){
+                    if(this.local.userId) {
+                        console.log('handleWriteDiary is triggered');
+                        let payload = {
+                            specialId: this.local.userId,
+                            category: this.diaryPayload.category ??= "Others",
+                            content: this.diaryPayload.content,
+                            datePosted: moment(Date.now()).format('LLL'),
+                            postedBy: this.user.firstName
+                        }
+                        axios.post(this.baseUrl+'api/diary/create', payload)
+                            .then(res => {
+                                this.fetchDiaries(); 
+                                let snackbar = document.getElementById("snackbar");
+                                    snackbar.className = "show";
+                                    setTimeout(() => { 
+                                        snackbar.className = snackbar.className.replace("show", ""); 
+                                    }, 3000);
+                            })
+                            .catch(err => console.error(err));
+                    }
+                    this.fetchDiaries();
+                },
+                filterBy: function(type) {
+                    switch(true) {
+                        case type === "ALL":
+                            this.diarySync = true;
+                            this.fetchDiaries();
+                            break;
+                        case type === "OTHERS":
+                            console.log("OTHERS");
+                            this.diaryBuffer = this.diaries?.filter((data) => data.category.toLowerCase() == "others");
+                            break;
+                        case type === "PERSONAL":
+                            console.log("PERSONAL");
+                            this.diaryBuffer = this.diaries?.filter((data) => data.category.toLowerCase() == "personal");
+                            break;
+                        case type === "SCHOOL":
+                            console.log("SCHOOL");
+                            this.diaryBuffer = this.diaries?.filter((data) => data.category.toLowerCase() == "school");
+                            break;
+                        case type === "PEERS":
+                            console.log("PEERS");
+                            this.diaryBuffer = this.diaries?.filter((data) => data.category.toLowerCase() == "peers");
+                            break;
+                        default: 
+                            return null
+                    }
+                },
+                fetchDiaries: async function() {
                     if(this.local.userId) {
                         await axios.get(this.baseUrl+'api/diary/all')
                             .then(res => {
-                                this.diaries = res.data.reverse()
-                                console.log(res.data);
+                                this.diaries = res.data.reverse();
+                                this.diaryBuffer = res.data;
                             })
                             .catch(err => console.error(err));
+                            console.log(this.diaries);
+                    }
+                },
+                componentDidMount: async function() {
+                    if(this.local.userId) {
                         await axios.get(this.baseUrl+`api/profile/findBySpecialId/${this.local?.userId}`)
                             .then(res => {
                                 this.user = res.data[0];
@@ -78,9 +184,12 @@
                 }
             },
             mounted: function() {
-                if(localStorage.diaryLocalStorage)  this.local = JSON.parse(localStorage.diaryLocalStorage);
-                if(!this.local) return location.href = '../index.html';
-                this.componentDidMount();
+                if(localStorage.diaryLocalStorage) {
+                    this.local = JSON.parse(localStorage.diaryLocalStorage)
+                    this.componentDidMount();
+                    this.fetchDiaries();
+                    return false;
+                } else location.href = '../index.html';
             }
         })
     </script>

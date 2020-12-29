@@ -37,7 +37,10 @@
                             v-model="diaryPayload.content" required></textarea>
                         <button type="submit" class="uk-button uk-button-primary mt-4">Post</button>
                     </form>
-                    
+
+                    <div id="snackbar" style="background: #34A853;">
+                        <p class="p-3 m-0 font-weight-light">Posted successfully!</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -76,7 +79,16 @@
                         postedBy: this.diaryPayload.postedBy
                     }
                     axios.post(this.baseURL+'api/diary/create', payload)
-                        .then(res =>  location.href="feed.html")
+                        .then(res =>  {
+                            let snackbar = document.getElementById("snackbar");
+                                snackbar.className = "show";
+                                setTimeout(() => { 
+                                    snackbar.className = snackbar.className.replace("show", ""); 
+                                }, 1500);
+                            setTimeout(() => {
+                                location.href="feed.html"
+                            }, 1500);
+                        })
                         .catch(err => console.error(err));
                  }
              }

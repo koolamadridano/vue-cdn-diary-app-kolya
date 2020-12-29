@@ -10,8 +10,48 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.6.5/dist/css/uikit.min.css" />
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"/>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+        <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@300&family=Nanum+Gothic&family=Source+Sans+Pro:wght@200&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="css/app.css">
     </head>
+    <style>
+        /* to lower */
+        @media only screen and (max-width: 600px) {
+            .posts {
+                display: flex;
+                flex-direction: column;
+            }
+            .icon {
+                font-size: 10px;
+            }
+            .content, .posted-by, .details {
+                font-size: 13px;
+            }
+            .video {
+                height: 200px;
+            }
+            .quote {
+                font-family: 'Darker Grotesque', sans-serif;
+                font-size: 20px;
+            }
+        }
+        /* to upper */
+        @media only screen and (min-width: 600px) {
+            .posted-by {
+                font-size: 12px;
+            }
+            .video {
+                height: 345px;
+            }
+            .posts {
+                display: flex;
+                justify-content: space-between;
+            }
+            .icon {
+                font-size: 13px;
+            }
+        }
+    </style>
 <body>
     <div id="app"> 
         <div class="container"  v-if="!loading">
@@ -26,17 +66,17 @@
                         </section>
                         <section>
                             <h2 class="font-weight-light p-0 m-0 text-dark">{{user?.lastName}}, {{user?.firstName}}</h2>
-                            <div class="text-secondary mt-2">{{user?.shortDescription}} </div>
+                            <div class="text-secondary mt-2 details quote">{{user?.shortDescription}} </div>
                             <div class="mt-2">
-                                <div>
+                                <div class="details">
                                     <i class="fas fa-location-arrow mr-1  text-secondary"></i>
                                     <span class="text-secondary">{{user?.address?.country}}, {{user?.address?.city}}</span>
                                 </div>
-                                <div>
+                                <div class="details">
                                     <i class="fas fa-graduation-cap mr-1  text-secondary"></i>
                                     <span class="text-secondary">{{user?.course}}</span>
                                 </div>
-                                <div>
+                                <div class="details">
                                     <i class="fas fa-birthday-cake mr-1  text-secondary"></i>
                                     <span class="text-secondary">{{user?.birthDate}}</span>
                                 </div>
@@ -59,7 +99,7 @@
                                     <span uk-icon="icon:rss; ratio: 0.9" class="mt-1"></span>
                                 </div>
                             </h5>
-                            <h3 class="font-weight-light mt-5 mb-2 blockquote">"{{quoteOfTheDay}}"</h3>
+                            <h3 class="font-weight-light mt-5 mb-2 blockquote quote">"{{quoteOfTheDay}}"</h3>
                             <h5 class="text-white font-weight-light mt-5">
                                 <div class="d-flex justify-content-start pointer" @click="handler('LOGOUT', null)">
                                     <span>Sign-out&nbsp;</span>
@@ -69,10 +109,10 @@
                         </div>
                     </div>
                     <iframe 
+                        class="video"
                         style="margin-top: 50px"
                         id="profileVideo" 
                         width="100%" 
-                        height="345" 
                         src="" 
                         frameborder="0" 
                         scrolling="no" 
@@ -80,7 +120,7 @@
 
                     <div v-if="diaries.length > 0">
                         <div v-for="(data, index) in diaries" class="mt-2 p-5">
-                            <div class="d-flex justify-content-between align-items-center">
+                            <div class="posts">
                                 <h6 class="p-0 m-0">
                                     <div class="d-flex align-items-center">
                                         <span uk-icon="icon: hashtag"></span> 
@@ -88,16 +128,20 @@
                                     </div>
                                 </h6>
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <span class="text-secondary mr-2"> 
+                                    <span class="text-secondary mr-2" style="font-size: 13px;"> 
                                         <div class="d-flex align-items-center">
-                                            <span uk-icon="icon: calendar"></span> 
+                                            <i class="fas fa-calendar-alt icon" ></i>
                                             <span>&nbsp;{{data.datePosted}}</span>
                                         </div>
                                     </span>
-                                    <span uk-icon="icon: trash; ratio: 1" class="text-danger pointer" @click="handler('DELETE', { id: data.id})"></span>
+                                    <span uk-icon="icon: trash; ratio: 0.9" class="text-danger pointer" @click="handler('DELETE', { id: data.id})"></span>
                                 </div>
                             </div>
-                            <p class="text-secondary mt-2">{{data.content}}</p>
+                            <div class="d-flex align-items-center  posted-by ml-3">
+                                <div class="text-secondary  ml-1">You diary</div>
+                            </div>
+
+                            <p class="text-secondary pl-2 pr-2 pt-3 content ">{{data.content}}</p>
                         </div>
                     </div>
                     <div v-else>
@@ -107,6 +151,10 @@
                     </div>
                     <div style="margin-top: 100px"></div>
                     <p class="text-center">&copy; KOLYA MADRIDANO</p>
+
+                    <div id="snackbar">
+                        <p class="p-3 m-0 font-weight-light">Deleted successfully!</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -144,14 +192,20 @@
                             break;
                         case type === "DELETE":
                             axios.delete(this.baseUrl + `api/diary/remove/` + payload.id)
-                                .then(res =>  this.fetchDiaries())
+                                .then(res => {
+                                    this.fetchDiaries()
+                                    let snackbar = document.getElementById("snackbar");
+                                        snackbar.className = "show";
+                                        setTimeout(() => { 
+                                            snackbar.className = snackbar.className.replace("show", ""); 
+                                        }, 3000);
+                                })
                                 .catch(err => console.log(err))
                             break;
                         default :
                             return null;
                     }
                 },
-       
                 fetchDiaries: function() {
                     if(this.local.userId) {
                         axios.get(this.baseUrl+`api/diary/findBySpecialId/${this.local?.userId}`)
