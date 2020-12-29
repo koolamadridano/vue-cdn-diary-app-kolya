@@ -18,14 +18,17 @@
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
+            z-index: 9999;
         }
     </style>
 <body>
     <div id="app"> 
-        <div uk-spinner="ratio: 3" class="centerElement" v-if="loading"></div>
-        <div class="container" v-if="!loading">
+        <div v-if="loading">
+            <div uk-spinner="ratio: 3" class="centerElement"></div>
+        </div>
+        <div class="container">
             <div class="row justify-content-center mt-5">
-                <div class="col-md-7">
+                <div class="col-md-7" v-if="!loading">
                     <section>
                         <section class="d-flex justify-content-end">
                             <span 
