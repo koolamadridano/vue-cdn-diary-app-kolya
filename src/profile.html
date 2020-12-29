@@ -159,6 +159,11 @@
                             <div v-for="(data, index) in gallery" >
                                 <div class="col">
                                     <div class="card">
+                                        <span 
+                                        @click="handleDeleteImg(data.id)"
+                                        uk-icon="icon: trash; ratio: 1" 
+                                        class="position-absolute m-3 text-danger pointer" 
+                                        style="bottom: 0; right: 0;"></span>
                                         <img v-bind:src="data.photoUrl" class=" gallery-img"/>
                                     </div>
                                 </div>
@@ -248,17 +253,19 @@
                         axios.post(this.cloudinaryUrl, formData)
                             .then(res => {
                                 this.uploadedBuffer = res.data;
+                                console.log(res.data);
                                 if(this.uploadedBuffer) {
                                     let payload = {
                                         specialId: this.local.userId,
                                         postedBy: this.user.firstName,
-                                        photoUrl: this.uploadedBuffer.url,
+                                        photoUrl: this.uploadedBuffer.secure_url,
                                         datePosted: moment(Date.now()).format('LLL')
                                     }
                                     axios.post(this.baseUrl + 'api/gallery/upload',payload)
                                         .then(res => {
                                             this.handleFetchGallery();
                                             this.uploadIsDisabled = false;
+
                                         })
                                         .catch(err => {
                                             this.uploadIsDisabled = false;
@@ -273,7 +280,7 @@
                     if(this.local.userId) {
                         axios.get(this.baseUrl + `api/gallery/findBySpecialId/${this.local.userId}`)
                             .then(res => {
-                                this.gallery = res.data
+                                this.gallery = res.data.reverse();
                             })
                             .catch(err => console.log(err))
                     }
@@ -282,6 +289,11 @@
                     this.file = event.target.files[0];
                     //file counter
                     this.fileSelected = event.target.files.length;
+                },
+                handleDeleteImg: function(Id) {
+                    axios.delete(this.baseUrl + `api/gallery/remove/${Id}`)
+                        .then(res => this.handleFetchGallery())
+                        .catch(err => console.log(err));
                 },
                 handler: function(type, payload) {
                     switch(true) {
