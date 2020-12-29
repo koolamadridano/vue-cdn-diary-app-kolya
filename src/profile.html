@@ -12,6 +12,8 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
         <link rel="preconnect" href="https://fonts.gstatic.com">
         <link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@300&family=Nanum+Gothic&family=Source+Sans+Pro:wght@200&display=swap" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
+
         <link rel="stylesheet" href="../src/css/app.css">
     </head>
     <style>
@@ -117,7 +119,33 @@
                         frameborder="0" 
                         scrolling="no" 
                         uk-responsive uk-video="automute: true"></iframe>
-
+                          
+                    <section class="mt-5 d-flex justify-content-end">
+                        <button class="uk-button uk-button-primary" @click="redirectToCreateDiary">Write new diary</button>
+                        <button class="uk-button uk-button-default" @click="redirectToFeed">Feed</button>
+                    </section>
+                    <section class="d-flex justify-content-around align-items-center mt-5">
+                        <h1 class="font-weight-light text-center">Gallery</h1>
+                        <div class="uk-margin" uk-margin>
+                            <form @submit.prevent="uploadToCloud" enctype="multipart/form-data">
+                                <div uk-form-custom="target: true">
+                                    <input type="file" name="files[]"    multiple>
+                                    <input class="uk-input uk-form-width-medium" type="text" placeholder="Select to upload" disabled>
+                                </div>
+                                <button type="submit" class="uk-button uk-button-default">UPLOAD</button>
+                            </form>
+                        </div>
+                    </section>
+                    
+                    <div class="row row-cols-1 row-cols-md-3 g-4">
+                        <div v-for="(data, index) in gallery">
+                            <div class="col">
+                                <div class="card">
+                                    <img v-bind:src="data.photoUrl" class="img-fluid"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div v-if="diaries.length > 0">
                         <div v-for="(data, index) in diaries" class="mt-2 p-5">
                             <div class="posts">
@@ -171,10 +199,13 @@
             local: null,
             data: {
                 baseUrl: 'https://www.diaryapi.somee.com/',
+                cloudinaryUrl:"https://api.cloudinary.com/v1_1/yourmysomi/image/upload",
                 user: {},
                 diaries: [],
                 quoteOfTheDay: null,
-                loading: true
+                loading: true,
+                uploadedBuffer: {},
+                gallery: []
             },
             methods: {
                 redirectToFeed: function() {
@@ -182,6 +213,48 @@
                 },
                 redirectToCreateDiary: function() {
                     return location.href = "create-diary.html";
+                },
+                uploadToCloud: async function() {
+                    const form = document.querySelector("form");
+                    const files = document.querySelector("[type=file]").files;
+                    const formData = new FormData();
+
+
+                    for (let i = 0; i < files.length; i++) {
+                        let file = files[i];
+                        formData.append("file", file);
+                        formData.append("upload_preset", "snoecp7q");
+                        axios.post(this.cloudinaryUrl, formData)
+                            .then(res => {
+                                this.uploadedBuffer = res.data;
+                                if(this.uploadedBuffer) {
+                                    let payload = {
+                                        specialId: this.local.userId,
+                                        postedBy: this.user.firstName,
+                                        photoUrl: this.uploadedBuffer.url,
+                                        datePosted: moment(Date.now()).format('LLL')
+                                    }
+                                    axios.post(this.baseUrl + 'api/gallery/upload',payload)
+                                        .then(res => this.handleFetchGallery())
+                                        .catch(err => console.log(err))
+                                    }
+                            })
+                            .catch(err => console.log(err))
+                    }
+                },
+                handleFetchGallery: function() {
+                    if(this.local.userId) {
+                        axios.get(this.baseUrl + `api/gallery/findBySpecialId/${this.local.userId}`)
+                            .then(res => {
+                                this.gallery = res.data
+                            })
+                            .catch(err => console.log(err))
+                    }
+                },
+                handleFileChange: function(event) {
+                    this.file = event.target.files[0];
+                    //file counter
+                    this.fileSelected = event.target.files.length;
                 },
                 handler: function(type, payload) {
                     switch(true) {
@@ -227,6 +300,7 @@
                         await axios.get(this.baseUrl+`api/profile/findBySpecialId/${this.local?.userId}`)
                             .then(res => {
                                 this.user = res.data[0];
+
                                 if(this.user.length == 0) return location.href = "editprofile.html";
                                 document.title = this.user?.firstName + " " + this.user?.lastName;
                                 let youtubeVideoUrl = this.user?.media.video;
@@ -243,6 +317,7 @@
                     this.componentDidMount();
                     this.fetchDiaries();
                     this.loading = false;
+                    this.handleFetchGallery();
 
                 } else  location.href = "../index.html";
             }
