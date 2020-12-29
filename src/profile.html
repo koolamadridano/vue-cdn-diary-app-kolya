@@ -32,13 +32,27 @@
             .video {
                 height: 200px;
             }
+  
             .quote {
                 font-family: 'Darker Grotesque', sans-serif;
                 font-size: 20px;
             }
+            .galleryHeaderSection {
+                display: flex;
+                flex-direction: column;
+            }
+            .galleryHeaderSectionInput {
+                display: flex;
+                
+            }
         }
         /* to upper */
         @media only screen and (min-width: 600px) {
+            .galleryHeaderSection{
+                display: flex;
+                justify-content: space-around;
+                align-items: center;
+            }
             .posted-by {
                 font-size: 12px;
             }
@@ -124,24 +138,29 @@
                         <button class="uk-button uk-button-primary" @click="redirectToCreateDiary">Write new diary</button>
                         <button class="uk-button uk-button-default" @click="redirectToFeed">Feed</button>
                     </section>
-                    <section class="d-flex justify-content-around align-items-center mt-5">
+                    <section class="galleryHeaderSection mt-5">
                         <h1 class="font-weight-light text-center">Gallery</h1>
                         <div class="uk-margin" uk-margin>
                             <form @submit.prevent="uploadToCloud" enctype="multipart/form-data">
-                                <div uk-form-custom="target: true">
-                                    <input type="file" name="files[]"    multiple>
-                                    <input class="uk-input uk-form-width-medium" type="text" placeholder="Select to upload" disabled>
-                                </div>
-                                <button type="submit" class="uk-button uk-button-default" :disabled="uploadIsDisabled">UPLOAD</button>
+                               <div class="galleryHeaderSectionInput">
+                                    <div uk-form-custom="target: true">
+                                        <input type="file" name="files[]"    multiple>
+                                        <input class="uk-input uk-form-width-medium" type="text" placeholder="Select to upload" disabled>
+                                    </div>
+                                    <button type="submit" class="uk-button uk-button-default" :disabled="uploadIsDisabled">UPLOAD</button>
+                               </div>
                             </form>
                         </div>
                     </section>
                     
-                    <div class="row row-cols-1 row-cols-md-3 g-4">
-                        <div v-for="(data, index) in gallery">
-                            <div class="col">
-                                <div class="card">
-                                    <img v-bind:src="data.photoUrl" class="img-fluid"/>
+                    
+                    <div class="justify-content-center">
+                        <div class="row row-cols-1 row-cols-md-3 g-4">
+                            <div v-for="(data, index) in gallery" >
+                                <div class="col">
+                                    <div class="card">
+                                        <img v-bind:src="data.photoUrl" class=" gallery-img"/>
+                                    </div>
                                 </div>
                             </div>
                         </div>
