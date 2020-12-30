@@ -15,10 +15,15 @@
 <body>
     <div id="app">
         <div class="container">
-            <div class="row justify-content-center" style="margin-top: 120px;">
+            <div class="row justify-content-center" style="margin-top: 100px;">
                 <div class="col-md-5">
-                    <h1 class="font-weight-light text-secondary">Create profile to continue</h1>
-                    <form @submit.prevent="handleCreate">
+                    <h2 class="font-weight-light text-secondary">
+                        <div class="d-flex align-items-center">
+                            <span uk-icon="icon: cog; ratio: 1.5"></span>
+                            <span class="ml-2">Profile Settings</span>
+                        </div>
+                    </h2>
+                    <form @submit.prevent="handleUpdate">
                         <div class="uk-grid-small mt-5" uk-grid>
                             <div class="uk-width-1-2@s ">
                                 <input 
@@ -54,11 +59,12 @@
                             </div>
                             <div class="uk-width-1-2@s">
                                 <input 
+                                    value="2017-06-01"
                                     class="uk-input uk-form-width-large" 
                                     type="date" 
                                     min="1950-01-01"
                                     placeholder="Lastname" 
-                                    v-model="createPayload.birthDate" required/>
+                                    required/>
                             </div>
                         </div>
                         <div class="uk-margin mt-2">
@@ -108,8 +114,9 @@
                                 placeholder="YouTube video link that describes you"
                                 v-model="createPayload.video" required/>
                         </div>
-                        <div class="d-flex justify-content-end">
-                            <button type="submit" class="uk-button uk-button-primary mt-3" :disabled="isDisabled">
+                        <div class="d-flex justify-content-end  mt-5">
+                            <button type="submit" class="uk-button uk-button-default mr-2 text-secondary" @click="redirectToProfile">return to profile</button>
+                            <button type="submit" class="uk-button uk-button-primary" :disabled="isDisabled">
                                 Save profile 
                                 <i class="fas fa-spinner fa-spin" v-if="loading"></i>
                             </button>
@@ -132,6 +139,7 @@
                 baseUrl: 'https://www.diaryapi.somee.com/',
                 loading: false,
                 isDisabled: false,
+                user: {},
                 createPayload: {
                     firstName: null,
                     lastName: null,
@@ -147,47 +155,56 @@
                 youTubeLinkIsInvalid: false
             },
             methods: {
-                handleCreate: function() {
+                handleUpdate: function() {
                     var youtubeRegexp = /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$/;
                     let youTubeLink = this.createPayload.video;
 
-                    let payload = {
-                        specialId: this.local.userId,
-                        firstName: this.createPayload.firstName,
-                        lastName: this.createPayload.lastName,
-                        gender: this.createPayload.gender ??= "Rather not to say",
-                        shortDescription: this.createPayload.shortDescription ??= "This user is crazy",
-                        course: this.createPayload.course,
-                        address: {
-                            country: this.createPayload.country,
-                            city: this.createPayload.city
-                        },
-                        media: {
-                            music: null,
-                            video: this.createPayload.video
-                        },
-                        birthDate: moment(Date.parse(this.createPayload.birthDate)).format('LL')
-                    }
-                    if(youTubeLink.match(youtubeRegexp)) {
+                    if(youTubeLink.match(youtubeRegexp) && this.user.id) {
                         this.loading = true;
                         this.isDisabled = true;
                         this.youTubeLinkIsInvalid = false;
-                        console.log(payload);
-                        axios.post(this.baseUrl + 'api/profile/create', payload)
+
+                        let payload = {
+                            id: this.user.id,
+                            specialId: this.local.userId,
+                            firstName: this.createPayload.firstName,
+                            lastName: this.createPayload.lastName,
+                            gender: this.createPayload.gender ??= "Rather not to say",
+                            shortDescription: this.createPayload.shortDescription ??= "This user is crazy",
+                            course: this.createPayload.course,
+                            address: {
+                                country: this.createPayload.country,
+                                city: this.createPayload.city
+                            },
+                            media: {
+                                music: null,
+                                video: youTubeLink
+                            },
+                            birthDate: moment(Date.parse(this.createPayload.birthDate)).format('LL')
+                        }
+                        axios.put(this.baseUrl + 'api/profile/update', payload)
                             .then(res => {
+                                console.log(payload);
                                 this.loading = false;
-                                location.href="profile.html"
                             })
                             .catch(err => this.isDisabled=false);
                     }  else this.youTubeLinkIsInvalid = true;
                 },
-                redirectToRegistration: function() {
-                    return location.href="src/registration.html";
+                redirectToProfile: function() {
+                    return location.href="profile.html";
+                },
+                componentDidMount: function() {
+                    axios.get(this.baseUrl+`api/profile/findBySpecialId/${this.local?.userId}`)
+                        .then(res => {
+                            this.user = res.data[0];
+                            console.log(this.user);
+                        }).catch(err => console.log(err));
                 }
             },
             mounted: function() {
                 if(localStorage.diaryLocalStorage) {
                     this.local = JSON.parse(localStorage.diaryLocalStorage);
+                    this.componentDidMount();
                 } else  location.href = "../index.html";
                 
             }

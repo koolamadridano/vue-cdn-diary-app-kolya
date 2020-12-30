@@ -10,8 +10,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.6.5/dist/css/uikit.min.css" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-
     <link rel="stylesheet" href="./src/css/app.css">
+
 </head>
 <body>
     <div id="app">
@@ -60,6 +60,8 @@
                             </div>
                         </div>
                     </form>
+
+
                 </div>
             </div>
         </div>
@@ -86,7 +88,9 @@
             methods: {
                 handleLogin: function() {
                     this.isLoggingIn = true;
-                    axios.post(this.baseURL + `TOKEN?username=${this.loginPayload.username}&password=${this.loginPayload.password}`)
+                    axios.post(this.baseURL + `TOKEN?username=${this.loginPayload.username}&password=${this.loginPayload.password}`, {
+                        timeout: 3000
+                    })
                     .then(res => {
                             this.localStorage = res.data;
                             localStorage.setItem("diaryLocalStorage", JSON.stringify(this.localStorage));
@@ -111,6 +115,9 @@
                 redirectToRegistration: function() {
                     return location.href="src/create-account.html";
                 }
+            },
+            mounted: function() {
+         
             }
         })
     </script>
