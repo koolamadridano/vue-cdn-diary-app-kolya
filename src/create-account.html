@@ -27,7 +27,7 @@
                                 class="uk-input uk-form-width-large" 
                                 type="text" 
                                 placeholder="Username or Email" 
-                                v-model="registerPayload.username" required>
+                                v-model.trim="registerPayload.username" required>
                         </div>
                         <div class="uk-inline mt-2">
                             <span 
@@ -37,7 +37,7 @@
                                 class="uk-input uk-form-width-large" 
                                 type="password" 
                                 placeholder="Password" 
-                                v-model="registerPayload.password" required>
+                                v-model.trim="registerPayload.password" required>
                         </div>
 
                         <div class="uk-inline mt-2">
@@ -48,7 +48,7 @@
                                 class="uk-input uk-form-width-large" 
                                 type="password" 
                                 placeholder="Confirm password" 
-                                v-model="registerPayload.passwordIsMatched" required>
+                                v-model.trim="registerPayload.passwordIsMatched" required>
                         </div>
 
                         <p v-if="registerPayload.isError" class="p-3 m-0 text-danger text-center" style="font-size: 13px;">Oops, {{registerPayload.message}}</p>

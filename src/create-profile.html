@@ -27,7 +27,7 @@
                                     minlength="2"
                                     maxlength="30"
                                     placeholder="Firstname" 
-                                    v-model="createPayload.firstName" required />
+                                    v-model.trim="createPayload.firstName" required />
                             </div>
                             <div class="uk-width-1-2@s">
                                 <input 
@@ -36,7 +36,7 @@
                                     minlength="2"
                                     maxlength="30"
                                     placeholder="Lastname" 
-                                    v-model="createPayload.lastName" required/> 
+                                    v-model.trim="createPayload.lastName" required/> 
                             </div>
                         </div>
                         <div class="uk-grid-small mt-2" uk-grid>
@@ -68,7 +68,7 @@
                                 minlength="20"
                                 maxlength="50"
                                 placeholder="Describe your self" 
-                                v-model="createPayload.shortDescription" required></textarea>
+                                v-model.trim="createPayload.shortDescription" required></textarea>
                         </div>
                         <div class="uk-grid-small mt-2" uk-grid>
                             <div class="uk-width-1-2@s ">
@@ -77,7 +77,7 @@
                                     type="text" 
                                     maxlength="50"
                                     placeholder="Country" 
-                                    v-model="createPayload.country" required/>
+                                    v-model.trim="createPayload.country" required/>
                             </div>
                             <div class="uk-width-1-2@s">
                                 <input 
@@ -85,7 +85,7 @@
                                     type="text" 
                                     maxlength="50"
                                     placeholder="City/Town" 
-                                    v-model="createPayload.city" required/>
+                                    v-model.trim="createPayload.city" required/>
                             </div>
                         </div>
                         <div class="uk-inline mt-2">
@@ -94,7 +94,7 @@
                                 type="text" 
                                 maxlength="50"
                                 placeholder="Course"
-                                v-model="createPayload.course" required/>
+                                v-model.trim="createPayload.course" required/>
                         </div>
                         <div class="uk-inline mt-2">
                             <span 
@@ -106,7 +106,7 @@
                                 v-bind:class="{ 'uk-form-danger': youTubeLinkIsInvalid}"
                                 type="text" 
                                 placeholder="YouTube video link that describes you"
-                                v-model="createPayload.video" required/>
+                                v-model.trim="createPayload.video" required/>
                         </div>
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="uk-button uk-button-primary mt-3" :disabled="isDisabled">

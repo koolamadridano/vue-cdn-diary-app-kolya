@@ -59,11 +59,11 @@
                             </div>
                             <div class="uk-width-1-2@s">
                                 <input 
-                                    value="2017-06-01"
                                     class="uk-input uk-form-width-large" 
                                     type="date" 
                                     min="1950-01-01"
                                     placeholder="Lastname" 
+                                    v-model="createPayload.birthDate"
                                     required/>
                             </div>
                         </div>
@@ -74,7 +74,7 @@
                                 minlength="20"
                                 maxlength="50"
                                 placeholder="Describe your self" 
-                                v-model="createPayload.shortDescription" required></textarea>
+                                v-model.trim="createPayload.shortDescription" required></textarea>
                         </div>
                         <div class="uk-grid-small mt-2" uk-grid>
                             <div class="uk-width-1-2@s ">
@@ -83,7 +83,7 @@
                                     type="text" 
                                     maxlength="50"
                                     placeholder="Country" 
-                                    v-model="createPayload.country" required/>
+                                    v-model.trim="createPayload.country" required/>
                             </div>
                             <div class="uk-width-1-2@s">
                                 <input 
@@ -91,7 +91,7 @@
                                     type="text" 
                                     maxlength="50"
                                     placeholder="City/Town" 
-                                    v-model="createPayload.city" required/>
+                                    v-model.trim="createPayload.city" required/>
                             </div>
                         </div>
                         <div class="uk-inline mt-2">
@@ -100,7 +100,7 @@
                                 type="text" 
                                 maxlength="50"
                                 placeholder="Course"
-                                v-model="createPayload.course" required/>
+                                v-model.trim="createPayload.course" required/>
                         </div>
                         <div class="uk-inline mt-2">
                             <span 
@@ -112,7 +112,7 @@
                                 v-bind:class="{ 'uk-form-danger': youTubeLinkIsInvalid}"
                                 type="text" 
                                 placeholder="YouTube video link that describes you"
-                                v-model="createPayload.video" required/>
+                                v-model.trim="createPayload.video" required/>
                         </div>
                         <div class="d-flex justify-content-end  mt-5">
                             <button type="submit" class="uk-button uk-button-default mr-2 text-secondary" @click="redirectToProfile">return to profile</button>
@@ -135,6 +135,7 @@
         var app = new Vue({
             el: '#app',
             local: null,
+
             data: {
                 baseUrl: 'https://www.diaryapi.somee.com/',
                 loading: false,
@@ -197,7 +198,28 @@
                     axios.get(this.baseUrl+`api/profile/findBySpecialId/${this.local?.userId}`)
                         .then(res => {
                             this.user = res.data[0];
-                            console.log(this.user);
+                            this.createPayload.firstName = this.user.firstName;
+                            this.createPayload.lastName = this.user.lastName;
+                            this.createPayload.gender = this.user.gender;
+                            this.createPayload.shortDescription = this.user.shortDescription;
+                            this.createPayload.city = this.user.address.city;
+                            this.createPayload.country = this.user.address.country;
+                            this.createPayload.course = this.user.course;
+                            this.createPayload.video = this.user.media.video;
+
+
+                            function formatDate(value) {
+                                let givenDate = new Date(value);
+                                let year = givenDate.getFullYear().toString();
+                                let fixedMonth = givenDate.getMonth() + 1;
+                                let month = fixedMonth < 10 ? `0${fixedMonth.toString()}` : fixedMonth.toString();
+                                let day = givenDate.getDate() < 10 ? `0${givenDate.getDate().toString()}` : givenDate.getDate().toString();
+                                let formattedDate = `${year}-${month}-${day}`
+                                return formattedDate;
+                               
+                            }
+                            this.createPayload.birthDate = formatDate(this.user.birthDate);
+
                         }).catch(err => console.log(err));
                 }
             },
