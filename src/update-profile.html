@@ -11,12 +11,31 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="css/app.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <style>
+        /* to lower */
+        @media only screen and (max-width: 600px) {
+           .buttons  {
+               display: flex;
+               justify-content: end;
+               flex-direction: column;
+
+           }
+        }
+        /* to upper */
+        @media only screen and (min-width: 600px) {
+            .buttons  {
+               display: flex;
+               justify-content: center;
+               flex-direction: row;
+           }
+        }
+    </style>
 </head>
 <body>
     <div id="app">
         <div class="container">
             <div class="row justify-content-center" style="margin-top: 100px;">
-                <div class="col-md-5">
+                <div class="col-xl-5 col-lg-5 col-md-7">
                     <h2 class="font-weight-light text-secondary">
                         <div class="d-flex align-items-center">
                             <span uk-icon="icon: cog; ratio: 1.5"></span>
@@ -114,7 +133,7 @@
                                 placeholder="YouTube video link that describes you"
                                 v-model.trim="createPayload.video" required/>
                         </div>
-                        <div class="d-flex justify-content-end  mt-5">
+                        <div class="buttons mt-5">
                             <button type="submit" class="uk-button uk-button-default mr-2 text-secondary" @click="redirectToProfile">return to profile</button>
                             <button type="submit" class="uk-button uk-button-primary" :disabled="isDisabled">
                                 Save profile 
