@@ -139,31 +139,45 @@
                         <button class="uk-button uk-button-default" @click="redirectToFeed">Feed</button>
                     </section>
                     <section class="galleryHeaderSection mt-5">
-                        <h1 class="font-weight-light text-center">Gallery</h1>
-                        <div class="uk-margin" uk-margin>
-                            <form @submit.prevent="uploadToCloud" enctype="multipart/form-data">
+                        <h1 class="font-weight-light text-center">
+                            <div class="d-flex justify-content-center align-items-center">
+                                <span uk-icon="icon: album; ratio: 2"></span>
+                                <span class="ml-2">Gallery</span>
+                            </div>
+                        </h1>
+                        <div class="uk-margin p-4" uk-margin>
+                            <form 
+                                v-bind:class="{ 'd-none': isUploading}" 
+                                @submit.prevent="uploadToCloud" 
+                                enctype="multipart/form-data">
                                <div class="galleryHeaderSectionInput">
                                     <div uk-form-custom="target: true">
-                                        <input type="file" name="files[]"    multiple>
-                                        <input class="uk-input uk-form-width-medium" type="text" placeholder="Select to upload" disabled>
+                                        <input type="file" name="files[]" accept="image/*" @change="handleImgPath">
+                                        <input class="uk-input uk-form-width-medium" type="text" placeholder="Upload Image to gallery" disabled>
                                     </div>
                                     <button type="submit" class="uk-button uk-button-default" :disabled="uploadIsDisabled">UPLOAD</button>
-                               </div>
+                                </div>
                             </form>
+                            <section v-if="isUploading">
+                                <div class="d-flex align-items-center text-secondary">
+                                    <span class="mr-1">Uploading</span> 
+                                    <i class="fas fa-spinner fa-spin" ></i>
+                                </div>
+                            </section>
                         </div>
                     </section>
                     
                     
                     <div class="justify-content-center">
-                        <div class="row row-cols-1 row-cols-md-3 g-4">
+                        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
                             <div v-for="(data, index) in gallery" >
                                 <div class="col">
                                     <div class="card">
                                         <span 
-                                        @click="handleDeleteImg(data.id)"
-                                        uk-icon="icon: trash; ratio: 1" 
-                                        class="position-absolute m-3 text-danger pointer" 
-                                        style="bottom: 0; right: 0;"></span>
+                                            @click="handleDeleteImg(data.id)"
+                                            uk-icon="icon: trash; ratio: 1" 
+                                            class="position-absolute m-3 text-danger pointer" 
+                                            style="bottom: 0; right: 0;"></span>
                                         <img v-bind:src="data.photoUrl" class=" gallery-img"/>
                                     </div>
                                 </div>
@@ -230,9 +244,14 @@
                 loading: true,
                 uploadedBuffer: {},
                 gallery: [],
-                uploadIsDisabled: false
+                uploadIsDisabled: false,
+                toggleUploadBtn: false,
+                isUploading: false
             },
             methods: {
+                handleImgPath: function(){
+                    this.toggleUploadBtn = true;
+                },
                 redirectToFeed: function() {
                     return location.href = "feed.html";
                 },
@@ -241,11 +260,10 @@
                 },
                 uploadToCloud: async function() {
                     this.uploadIsDisabled = true;
+                    this.isUploading = true;
                     const form = document.querySelector("form");
                     const files = document.querySelector("[type=file]").files;
                     const formData = new FormData();
-
-
                     for (let i = 0; i < files.length; i++) {
                         let file = files[i];
                         formData.append("file", file);
@@ -264,8 +282,8 @@
                                     axios.post(this.baseUrl + 'api/gallery/upload',payload)
                                         .then(res => {
                                             this.handleFetchGallery();
+                                            this.isUploading = false;
                                             this.uploadIsDisabled = false;
-
                                         })
                                         .catch(err => {
                                             this.uploadIsDisabled = false;

@@ -9,7 +9,8 @@
     <title>Diary - Sign up</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.6.5/dist/css/uikit.min.css" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="./src/css/app.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link rel="stylesheet" href="../src/css/app.css">
 </head>
 <body>
     <div id="app">
@@ -50,14 +51,14 @@
                                 v-model="registerPayload.passwordIsMatched" required>
                         </div>
 
-                        <div class="uk-alert-danger d-flex justify-content-between align-items-center p-2 m-2 pointer" uk-alert v-if="registerPayload.isError">
-                            <h6 class="text-danger p-0 m-0">{{registerPayload.message}}</h6>
-                            <span uk-icon="icon: close" @click="registerPayload.isError = false"></span>
-                        </div>
+                        <p v-if="registerPayload.isError" class="p-3 m-0 text-danger text-center" style="font-size: 13px;">Oops, {{registerPayload.message}}</p>
 
                         <!-- Button goes here -->
-                        <div class="d-grid gap-2 mt-2">
-                            <button type="submit" class="uk-button uk-button-primary uk-width-1-1 uk-margin-small-bottom">Create</button>
+                        <div class="d-grid gap-2 mt-3">
+                            <button type="submit" class="uk-button uk-button-primary uk-width-1-1 uk-margin-small-bottom">
+                                <span>Create account</span>
+                                <i class="fas fa-spinner fa-spin ml-1" v-if="isCreating"></i>
+                            </button>
                         </div>
                         <div class="d-grid gap-2">
                             <button type="button" class="uk-button uk-button-default uk-width-1-1 uk-margin-small-bottom" @click="redirectToLogin">Sign in instead</button>
@@ -85,13 +86,15 @@
                     passwordIsMatched: null,
                     message: null,
                 },
-                user: {} 
+                user: {},
+                isCreating: false
             },
             methods: {
                 redirectToLogin: function() {
                     location.href = '../index.html';
                 },
                 handleRegister: async function() {
+                    this.isCreating = true;
                     if(this.registerPayload.password === this.registerPayload.passwordIsMatched) {
                     let payload = {
                         username: this.registerPayload.username,
@@ -99,15 +102,18 @@
                         role: "allow"
                     }
                    await axios.post(`${this.baseURL}api/account/register`, payload)
-                        .then(res =>  location.href = '../index.html')
+                        .then(res =>  {
+                            location.href = '../index.html';
+                            this.isCreating = false;
+                        })
                         .catch(err => {
-                            console.log(err.response);
                             if(err.response.status === 400) {
                                 this.registerPayload = {
                                     isError: true,
                                     message: err.response.data.message
                                 }
                             }
+                            this.isCreating = false;
                         });
                     } else {
                         this.registerPayload = {
