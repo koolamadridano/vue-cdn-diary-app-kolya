@@ -335,18 +335,19 @@
                 },
                 handleMusic: function(event) {
                     let video = document.getElementById("profileVideo");
-                        window.addEventListener('message', event => {
-                            // IMPORTANT: check the origin of the data! 
-                            if (event.origin.startsWith('https://koolamadridano.github.io')) { 
-                                video.pauseVideo();
-                                console.log(video);
-                            } else {
-                                // The data was NOT sent from your site! 
-                                // Be careful! Do not use it. This else branch is
-                                // here just for clarity, you usually shouldn't need it.
-                                return; 
-                            } 
-                        });
+                        video = window.addEventListener('message', event => {
+                        // IMPORTANT: check the origin of the data! 
+                        if (event.origin.startsWith('https://koolamadridano.github.io')) { 
+                            video.pauseVideo();
+                            console.log(event.data); 
+                        } else {
+                            // The data was NOT sent from your site! 
+                            // Be careful! Do not use it. This else branch is
+                            // here just for clarity, you usually shouldn't need it.
+                            return; 
+                        } 
+                    }); 
+
               
                         if(audio) {
                         if(event == "playMusic"){
