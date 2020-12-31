@@ -162,7 +162,7 @@
                             </h5>
                         </div>
                     </div>
-                    <iframe class="video" style="margin-top: 50px" id="profileVideo"  width="100%"  src=""  frameborder="0" scrolling="no"></iframe>
+                    <iframe class="video" style="margin-top: 50px" id="profileVideo"  width="100%"  src=""  frameborder="0" scrolling="no" allowfullscreen></iframe>
                 
                     <section class="mt-5 d-flex justify-content-end">
                         <button class="uk-button uk-button-primary" @click="redirectToCreateDiary">Write new diary</button>
@@ -333,10 +333,9 @@
                     }
                 },
                 handleMusic: function(event) {
-                    let audio = document.getElementById("audio");
+                    console.log(document.getElementById("profileVideo").stopVideo());
                     if(audio) {
                         if(event == "playMusic"){
-                            
                             audio.play();
                             audio.volume = 0.2;
                             this.playing = true;
