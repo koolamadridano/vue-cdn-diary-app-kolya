@@ -80,7 +80,7 @@
                                 <i v-if="playing" class="fas fa-pause mr-3 uk-text-danger pointer" style="font-size: 20px;" @click="handleMusic('pause')"></i>
                                 <i v-if="!playing" class="fas fa-play mr-3 uk-text-primary pointer" style="font-size: 20px;" @click="handleMusic('playMusic')"></i>
                            </div>
-                           <span  uk-icon="icon: arrow-right; ratio:2" class="pointer"  uk-toggle="target: #offcanvas-push"></span>
+                           <span uk-icon="icon: arrow-right; ratio:2" class="pointer"  uk-toggle="target: #offcanvas-push"></span>
                         </section>
                         <section v-if="!userIsLoaded">
                             <div class="spinner">
@@ -162,7 +162,7 @@
                             </h5>
                         </div>
                     </div>
-                    <iframe v-if="youTubeVideoIsLoaded" class="video" style="margin-top: 50px" id="profileVideo"  width="100%"  src=""  frameborder="0" scrolling="no" uk-responsive uk-video="automute: true"></iframe>
+                    <iframe class="video" style="margin-top: 50px" id="profileVideo"  width="100%"  src=""  frameborder="0" scrolling="no"></iframe>
                 
                     <section class="mt-5 d-flex justify-content-end">
                         <button class="uk-button uk-button-primary" @click="redirectToCreateDiary">Write new diary</button>
@@ -409,7 +409,7 @@
                                     let youtubeVideoUrl = this.user?.media.video;
                                     let youtubeVideoId = youtubeVideoUrl?.slice(youtubeVideoUrl.indexOf("?v=") + 3);
                                     let targetIframe = document.getElementById('profileVideo');
-                                        targetIframe.src = `https://www.youtube.com/embed/${youtubeVideoId}?loop=1`;
+                                        targetIframe.src = `https://www.youtube.com/embed/${youtubeVideoId}`;
                                         
                                 this.userIsLoaded = true;
                                 axios.get("https://quotes.rest/qod?language=en", { headers: { "accept": "application/json", "X-TheySaidSo-Api-Secret": "kolya"  } })
