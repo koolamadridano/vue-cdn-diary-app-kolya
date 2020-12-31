@@ -297,7 +297,6 @@
                     return location.href="../src/update-profile.html";
                 },
                 uploadToCloud: async function() {
-
                     this.uploadIsDisabled = true;
                     this.isUploading = true;
                     const form = document.querySelector("form");
@@ -334,22 +333,8 @@
                     }
                 },
                 handleMusic: function(event) {
-                    let video = document.getElementById("profileVideo");
-                        video = window.addEventListener('message', event => {
-                        // IMPORTANT: check the origin of the data! 
-                        if (event.origin.startsWith('https://koolamadridano.github.io')) { 
-                            video.pauseVideo();
-                            console.log(event.data); 
-                        } else {
-                            // The data was NOT sent from your site! 
-                            // Be careful! Do not use it. This else branch is
-                            // here just for clarity, you usually shouldn't need it.
-                            return; 
-                        } 
-                    }); 
-
-              
-                        if(audio) {
+                    let audio = document.getElementById("audio");
+                    if(audio) {
                         if(event == "playMusic"){
                             audio.play();
                             audio.volume = 0.2;
