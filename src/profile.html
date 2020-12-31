@@ -337,8 +337,8 @@
                     let video = document.getElementById("profileVideo");
                         window.addEventListener('message', event => {
                             // IMPORTANT: check the origin of the data! 
-                            if (event.origin.startsWith('https://koolamadridano.github.io/')) { 
-                                video.contentWindow.pauseVideo();
+                            if (event.origin.startsWith('https://koolamadridano.github.io')) { 
+                                video.pauseVideo();
                                 console.log(video);
                             } else {
                                 // The data was NOT sent from your site! 
