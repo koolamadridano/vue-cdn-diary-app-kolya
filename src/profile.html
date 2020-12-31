@@ -297,6 +297,7 @@
                     return location.href="../src/update-profile.html";
                 },
                 uploadToCloud: async function() {
+
                     this.uploadIsDisabled = true;
                     this.isUploading = true;
                     const form = document.querySelector("form");
@@ -333,8 +334,10 @@
                     }
                 },
                 handleMusic: function(event) {
-                    console.log(document.getElementById("profileVideo").stopVideo());
-                    if(audio) {
+                    let video = document.getElementById("profileVideo");
+                        video?.contentWindow.postMessage('{"event":"command","func":"' + 'pauseVideo' + '","args":""}', '*');
+                        console.log(video);
+                        if(audio) {
                         if(event == "playMusic"){
                             audio.play();
                             audio.volume = 0.2;
