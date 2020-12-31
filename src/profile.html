@@ -336,8 +336,7 @@
                     let audio = document.getElementById("audio");
                     if(audio) {
                         if(event == "playMusic"){
-                            let video = document.getElementById('profileVideo')[0];
-                                video.contentWindow.postMessage('{"event":"command","func":"' + 'pauseVideo' + '","args":""}', '*');
+                            
                             audio.play();
                             audio.volume = 0.2;
                             this.playing = true;
