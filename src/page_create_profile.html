@@ -11,39 +11,30 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="css/app.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-    <style>
-        /* to lower */
-        @media only screen and (max-width: 600px) {
-           .buttons  {
-               display: flex;
-               justify-content: end;
-               flex-direction: column;
 
-           }
-        }
-        /* to upper */
-        @media only screen and (min-width: 600px) {
-            .buttons  {
-               display: flex;
-               justify-content: center;
-               flex-direction: row;
-           }
+    <style>
+        .pointer { 
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <div id="app">
         <div class="container">
-            <div class="row justify-content-center" style="margin-top: 100px;">
-                <div class="col-xl-5 col-lg-5 col-md-7">
-                    <h2 class="font-weight-light text-secondary">
-                        <div class="d-flex align-items-center">
-                            <span uk-icon="icon: cog; ratio: 1.5"></span>
-                            <span class="ml-2">Profile Settings</span>
+            <div class="row justify-content-center mt-5">
+                <div class="col-md-5">
+                    <form @submit.prevent="handleCreate" enctype="multipart/form-data">
+                        <div class="d-flex justify-content-center p-0 m-0">
+                            <div class="uk-margin" v-bind:class="{ 'd-none': photoSelected}">
+                                <div uk-form-custom >
+                                    <input id="src" type="file" name="selectedAvatar" accept="image/*" @change="handleProfileChange"/>
+                                    <img src="https://cdn.iconscout.com/icon/free/png-512/avatar-370-456322.png" tabindex="-1"  style="height: 150px;"   alt=""> 
+                                    <p v-if="avatarIsPresent == false" class="text-danger mt-3 mb-3 text-center">Avatar is required!</p>
+                                </div>
+                            </div>
+                            <img id="target" style="height: 150px;" v-bind:class="{ 'd-none': !photoSelected}"/>
                         </div>
-                    </h2>
-                    <form @submit.prevent="handleUpdate">
-                        <div class="uk-grid-small mt-5" uk-grid>
+                        <div class="uk-grid-small mt-3" uk-grid>
                             <div class="uk-width-1-2@s ">
                                 <input 
                                     class="uk-input uk-form-width-large" 
@@ -51,7 +42,7 @@
                                     minlength="2"
                                     maxlength="30"
                                     placeholder="Firstname" 
-                                    v-model="createPayload.firstName" required />
+                                    v-model.trim="createPayload.firstName" required />
                             </div>
                             <div class="uk-width-1-2@s">
                                 <input 
@@ -60,7 +51,7 @@
                                     minlength="2"
                                     maxlength="30"
                                     placeholder="Lastname" 
-                                    v-model="createPayload.lastName" required/> 
+                                    v-model.trim="createPayload.lastName" required/> 
                             </div>
                         </div>
                         <div class="uk-grid-small mt-2" uk-grid>
@@ -82,8 +73,7 @@
                                     type="date" 
                                     min="1950-01-01"
                                     placeholder="Lastname" 
-                                    v-model="createPayload.birthDate"
-                                    required/>
+                                    v-model="createPayload.birthDate" required/>
                             </div>
                         </div>
                         <div class="uk-margin mt-2">
@@ -133,10 +123,12 @@
                                 placeholder="YouTube video link that describes you"
                                 v-model.trim="createPayload.video" required/>
                         </div>
-                        <div class="buttons mt-5">
-                            <button type="submit" class="uk-button uk-button-default mr-2 text-secondary" @click="redirectToProfile">return to profile</button>
-                            <button type="submit" class="uk-button uk-button-primary" :disabled="isDisabled">
-                                Save profile 
+
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="uk-button uk-button-primary mt-3" :disabled="isDisabled">
+                                Save profile and continue
+                                <i class="fas fa-arrow-right" v-if="!loading"></i>
+
                                 <i class="fas fa-spinner fa-spin" v-if="loading"></i>
                             </button>
                         </div>
@@ -154,13 +146,14 @@
         var app = new Vue({
             el: '#app',
             local: null,
-
             data: {
                 baseUrl: 'https://www.diaryapi.somee.com/',
+                cloudinaryUrl:"https://api.cloudinary.com/v1_1/yourmysomi/image/upload",
                 loading: false,
                 isDisabled: false,
-                user: {},
+                selectedFile: false,
                 createPayload: {
+                    photoUrl: null,
                     firstName: null,
                     lastName: null,
                     gender: null,
@@ -172,78 +165,69 @@
                     video: null,
                     birthDate: null,
                 },
-                youTubeLinkIsInvalid: false
+                youTubeLinkIsInvalid: false,
+                photoSelected: false,
+                avatarIsPresent: null
             },
             methods: {
-                handleUpdate: function() {
+                handleProfileChange: function() {
+                    var src = document.getElementById("src");
+                    var target = document.getElementById("target");
+                    var fr = new FileReader();
+                        fr.onload = function(e) { target.src = this.result; };
+                        fr.readAsDataURL(src.files[0]);
+                        if(target) this.photoSelected = true;
+                        this.avatarIsPresent = true;
+                },
+                handleCreate: function() {
                     var youtubeRegexp = /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$/;
                     let youTubeLink = this.createPayload.video;
-
-                    if(youTubeLink.match(youtubeRegexp) && this.user.id) {
-                        this.loading = true;
-                        this.isDisabled = true;
+                    if(youTubeLink.match(youtubeRegexp)) {
                         this.youTubeLinkIsInvalid = false;
-
-                        let payload = {
-                            id: this.user.id,
-                            specialId: this.local.userId,
-                            firstName: this.createPayload.firstName,
-                            lastName: this.createPayload.lastName,
-                            gender: this.createPayload.gender ??= "Rather not to say",
-                            shortDescription: this.createPayload.shortDescription ??= "This user is crazy",
-                            course: this.createPayload.course,
-                            address: {
-                                country: this.createPayload.country,
-                                city: this.createPayload.city
-                            },
-                            media: {
-                                music: null,
-                                video: youTubeLink
-                            },
-                            birthDate: moment(Date.parse(this.createPayload.birthDate)).format('LL')
-                        }
-                        axios.put(this.baseUrl + 'api/profile/update', payload)
-                            .then(res => {
-                                console.log(payload);
-                                this.loading = false;
-                            })
-                            .catch(err => this.isDisabled=false);
+                        if(this.avatarIsPresent) {
+                            this.loading = true;
+                            const form = document.querySelector("form");
+                            const files = document.querySelector("[type=file]").files;
+                            const formData = new FormData();
+                            for (let i = 0; i < files.length; i++) {
+                                let file = files[i];
+                                    formData.append("file", file);
+                                    formData.append("upload_preset", "snoecp7q");
+                                    axios.post(this.cloudinaryUrl, formData)
+                                        .then(res => {
+                                            this.createPayload.photoUrl = res.data.secure_url;
+                                            let payload = {
+                                                specialId: this.local.userId,
+                                                photoUrl: this.createPayload.photoUrl,
+                                                firstName: this.createPayload.firstName,
+                                                lastName: this.createPayload.lastName,
+                                                gender: this.createPayload.gender ??= "Rather not to say",
+                                                shortDescription: this.createPayload.shortDescription ??= "This user is crazy",
+                                                course: this.createPayload.course,
+                                                address: {  country: this.createPayload.country, city: this.createPayload.city },
+                                                media: { music: null, video: this.createPayload.video },
+                                                birthDate: moment(Date.parse(this.createPayload.birthDate)).format('LL')
+                                            }
+                                            axios.post(this.baseUrl + 'api/profile/create', payload)
+                                            .then(res => {
+                                                this.isDisabled = true;
+                                                this.loading = false;
+                                                location.href="page_profile.html"
+                                            })
+                                            .catch(err => this.isDisabled=false);
+                                        })
+                                        .catch(err => console.error(err))
+                            }
+                        } else this.avatarIsPresent = false;
                     }  else this.youTubeLinkIsInvalid = true;
                 },
-                redirectToProfile: function() {
-                    return location.href="profile.html";
-                },
-                componentDidMount: function() {
-                    axios.get(this.baseUrl+`api/profile/findBySpecialId/${this.local?.userId}`)
-                        .then(res => {
-                            this.user = res.data[0];
-                            this.createPayload.firstName = this.user.firstName;
-                            this.createPayload.lastName = this.user.lastName;
-                            this.createPayload.gender = this.user.gender;
-                            this.createPayload.shortDescription = this.user.shortDescription;
-                            this.createPayload.city = this.user.address.city;
-                            this.createPayload.country = this.user.address.country;
-                            this.createPayload.course = this.user.course;
-                            this.createPayload.video = this.user.media.video;
-                            function formatDate(value) {
-                                let givenDate = new Date(value);
-                                let year = givenDate.getFullYear().toString();
-                                let fixedMonth = givenDate.getMonth() + 1;
-                                let month = fixedMonth < 10 ? `0${fixedMonth.toString()}` : fixedMonth.toString();
-                                let day = givenDate.getDate() < 10 ? `0${givenDate.getDate().toString()}` : givenDate.getDate().toString();
-                                let formattedDate = `${year}-${month}-${day}`
-                                return formattedDate;
-                               
-                            }
-                            this.createPayload.birthDate = formatDate(this.user.birthDate);
-
-                        }).catch(err => console.log(err));
+                redirectToRegistration: function() {
+                    return location.href="src/registration.html";
                 }
             },
             mounted: function() {
                 if(localStorage.diaryLocalStorage) {
                     this.local = JSON.parse(localStorage.diaryLocalStorage);
-                    this.componentDidMount();
                 } else  location.href = "../index.html";
                 
             }

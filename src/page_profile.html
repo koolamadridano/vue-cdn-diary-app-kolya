@@ -13,10 +13,12 @@
         <link rel="preconnect" href="https://fonts.gstatic.com">
         <link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@300&family=Nanum+Gothic&family=Source+Sans+Pro:wght@200&display=swap" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
-
         <link rel="stylesheet" href="../src/css/app.css">
     </head>
     <style>
+        .pointer {
+            cursor: pointer;
+        }
         /* to lower */
         @media only screen and (max-width: 600px) {
             .posts {
@@ -54,6 +56,9 @@
                 justify-content: space-around;
                 align-items: center;
             }
+            .details {
+                font-size: 14px;
+            }
             .posted-by {
                 font-size: 12px;
             }
@@ -74,117 +79,56 @@
     </style>
 <body>
     <div id="app"> 
-        <div class="container">
-            <div class="row justify-content-center mt-3">
-                <div class="col-md-7">
-                    <section>
-                        <section v-if="userIsLoaded" class="d-flex justify-content-between align-items-center">
-                            <div class="mr-3 text-secondary d-flex align-items-center"                                
-                                v-bind:class="{ 'hidden': !playing}" 
-                                style="opacity: 0.7;">
-                                <span>Music is playing</span>
-                                <i class="fas fa-spinner fa-spin ml-2"></i>
-                            </div>
-                            <section class="d-flex align-items-center">
-                                <div>    
-                                    <i v-if="playing" class="fas fa-pause mr-3 uk-text-secondary pointer" style="font-size: 20px;" @click="handler('MUSICCONTROL', { event: 'pause'})"></i>
-                                    <i v-if="!playing" class="fas fa-play mr-3 uk-text-secondary pointer" style="font-size: 20px;" @click="handler('MUSICCONTROL', { event: 'play'})"></i>
-                               </div>
-                               <span uk-icon="icon: arrow-right; ratio:2" class="pointer"  uk-toggle="target: #offcanvas-push"></span>
-                            </section>
-                        </section>
-                        <section v-if="!userIsLoaded">
-                            <div class="spinner">
-                                <div class="bounce1"></div>
-                                <div class="bounce2"></div>
-                                <div class="bounce3"></div>
-                            </div>
-                        </section>
-                        <section v-if="userIsLoaded">
-                            <h2 class="font-weight-light p-0 m-0 text-dark">{{user?.lastName}}, {{user?.firstName}}</h2>
-                            <div class="text-secondary mt-2 details uk-text-break w-75">{{user?.shortDescription}}</div>
-                            <div class="mt-2">
-                                <div class="details">
-                                    <i class="fas fa-birthday-cake mr-1  text-secondary"></i>
-                                    <span class="text-secondary mr-2">{{user?.birthDate}}, </span>
-                                    <i class="fas fa-venus-mars mr-1  text-secondary"></i>
-                                    <span class="text-secondary">{{user?.gender}}</span>
-                                </div>
-                                <div class="details">
-                                    <i class="fas fa-graduation-cap mr-1  text-secondary"></i>
-                                    <span class="text-secondary">{{user?.course}}</span>
-                                </div>
-                                <div class="details">
-                                    <i class="fas fa-location-arrow mr-1  text-secondary"></i>
-                                    <span class="text-secondary">{{user?.address?.country}}, {{user?.address?.city}}</span>
-                                </div>
-                            </div>
-                        </section>
-                    </section>
-                    <div id="offcanvas-push" uk-offcanvas="mode: push; overlay: true;flip: true" >
-                        <div class="uk-offcanvas-bar bg-secondary">
-                            <button class="uk-offcanvas-close" type="button" uk-close></button>
-                            <div style="margin-top: 150px;"></div>
-                            <h5 class="text-white font-weight-light pointer" @click="redirect('createDiary')">
-                                <div class="d-flex justify-content-start">
-                                    <span>Write new diary&nbsp;</span>
-                                    <span uk-icon="icon:file-edit; ratio: 0.9" class="mt-1"></span>
-                                </div>
-                            </h5>
-                            <h5 class="text-white font-weight-light pointer" @click="redirect('feed')">
-                                <div class="d-flex justify-content-start">
-                                    <span>Feed&nbsp;</span>
-                                    <span uk-icon="icon:rss; ratio: 0.9" class="mt-1"></span>
-                                </div>
-                            </h5>
-                            <h3 class="font-weight-light mt-5 mb-2 blockquote quote">"{{quoteOfTheDay}}"</h3>
-                            <h5 class="text-white font-weight-light pointer  mt-5" @click="redirect('updateProfile')">
-                                <div class="d-flex justify-content-start">
-                                    <span>Account settings&nbsp;</span>
-                                    <span uk-icon="icon:cog; ratio: 0.9" class="mt-1"></span>
-                                </div>
-                            </h5>
-                            <h5 class="text-white font-weight-light">
-                                <div class="d-flex justify-content-start pointer" @click="handler('LOGOUT', null)">
-                                    <span>Sign-out&nbsp;</span>
-                                    <span uk-icon="icon: sign-out; ratio: 0.9" class="mt-1"></span>
-                                </div>
-                            </h5>
-                        </div>
-                    </div>
-             
-                    <iframe class="video" style="margin-top: 20px" id="profileVideo"  width="100%" loading="lazy"  src=""  frameborder="0" scrolling="no" allowfullscreen></iframe>
-                    <section v-if="!contentIsReady" style="margin-top: -50px;">
-                        <div class="spinner">
-                            <div class="bounce1"></div>
-                            <div class="bounce2"></div>
-                            <div class="bounce3"></div>
-                        </div>
-                    </section>
-                    <section v-if="contentIsReady">
-                    <div class="d-flex align-items-center justify-content-end mt-3">
-                        <p class="text-secondary mr-3 p-0 m-0 pointer" @click="redirect('createDiary')">Write diary <i class="fas fa-edit"></i> </p>
-                        <p class="text-secondary p-0 m-0 mr-3 pointer" @click="redirect('feed')">Feed <i class="fas fa-rss"></i> </p>
-                    </div>
 
-                    <section class="galleryHeaderSection mt-5">
-                        <h1 class="font-weight-light text-center">
-                            <div class="d-flex justify-content-center align-items-center">
-                                <span uk-icon="icon: album; ratio: 2"></span>
-                                <span class="ml-2">Gallery</span>
+        <div class="container">
+            <div class="d-flex justify-content-between align-items mt-5">
+                <h2 class="text-secondary font-weight-light"><strong>Diary</strong>.me</h2>
+                <div class="d-flex align-items-center">
+                    <span uk-icon="icon: menu; ratio: 1.3; " class="pointer text-secondary"  uk-toggle="target: #offcanvas-push"></span>
+                </div>
+            </div>
+            <div class="row mt-5">
+                <div class="col-md-4">
+                    <img v-bind:src="user.photoUrl" class="rounded " style="height: 200px">
+                    <!-- Profile details -->
+                    <section v-if="contentIsReady" class="mt-3">
+                        <h5 class="font-weight-normal p-0 m-0 text-dark">{{user?.lastName}}, {{user?.firstName}}</h5>
+                        <div class="text-secondary mt-2 details uk-text-break w-75">{{user?.shortDescription}}</div>
+                        <div class="details mt-3">
+                            <div>
+                                <i class="fas fa-location-arrow mr-1 text-secondary"></i>
+                                <span class="text-secondary">{{user?.address?.country}}, {{user?.address?.city}}</span>
+                             </div>
+                            <div>
+                                <i class="fas fa-birthday-cake mr-1  text-secondary"></i>
+                                <span class="text-secondary mr-2">{{user?.birthDate}}</span>
+                                <i class="fas fa-venus-mars mr-1  text-secondary"></i>
+                                <span class="text-secondary">{{user?.gender}}</span>
                             </div>
-                        </h1>
-                        <div class="uk-margin p-4" uk-margin>
-                            <form 
-                                v-bind:class="{ 'd-none': isUploading}" 
-                                @submit.prevent="handler('UPLOADTOCLOUD')" 
-                                enctype="multipart/form-data">
-                               <div class="galleryHeaderSectionInput">
-                                    <div uk-form-custom="target: true">
-                                        <input type="file" name="files[]" accept="image/*">
-                                        <input class="uk-input uk-form-width-medium" type="text" placeholder="Upload Image to gallery" disabled>
+
+                            <div>
+                                <i class="fas fa-graduation-cap mr-1  text-secondary"></i>
+                                <span class="text-secondary">{{user?.course}}</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Gallery -->
+                    <section v-if="contentIsReady" class="mt-3">
+                        <section class="mt-4 mb-4">
+                            <form v-bind:class="{ 'd-none': isUploading}"   @submit.prevent="handler('UPLOADTOCLOUD')" enctype="multipart/form-data">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div uk-form-custom>
+                                        <input id="src" type="file" name="selectedAvatar" accept="image/*" @change="handleChangeSelectAvatar"/>
+                                        <div class="d-flex align-items-center" tabindex="-1">
+                                            <span uk-icon="icon: plus; ratio: 1.3" class="mr-1"></span>
+                                            <span>UPLOAD IMAGE</span>
+                                        </div>
                                     </div>
-                                    <button type="submit" class="uk-button uk-button-default" :disabled="uploadIsDisabled">UPLOAD</button>
+                                    <div class="d-flex">
+                                        <button v-bind:class="{ 'hidden' : !selectedAvatarIsActive}" type="button" class="uk-button uk-button-danger uk-button-small mr-1" :disabled="uploadIsDisabled" @click="handleCancelUpload"> cancel</button>
+                                        <button v-bind:class="{ 'hidden' : !selectedAvatarIsActive}" type="submit" class="uk-button uk-button-primary uk-button-small" :disabled="uploadIsDisabled"> upload</button>
+                                    </div>
                                 </div>
                             </form>
                             <section v-if="isUploading">
@@ -193,10 +137,8 @@
                                     <i class="fas fa-spinner fa-spin" ></i>
                                 </div>
                             </section>
-                        </div>
-                    </section>
-                    <div class="justify-content-center">
-                        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+                        </section>
+                        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-3 g-4">
                             <div v-for="(data, index) in gallery" >
                                 <div class="col">
                                     <div class="card">
@@ -210,41 +152,130 @@
                                 </div>
                             </div>
                         </div>
+                    </section>
+                    <div v-if="!contentIsReady" class="d-flex justify-content-center">
+                        <section  class="mt-5">
+                            <div class="spinner">
+                                <div class="bounce1"></div>
+                                <div class="bounce2"></div>
+                                <div class="bounce3"></div>
+                            </div>
+                        </section>
                     </div>
-                    <div v-if="diaries.length > 0">
-                        <div v-for="(data, index) in diaries" class="mt-2 p-5">
-                            <div class="posts">
-                                <h6 class="p-0 m-0">
-                                    <div class="d-flex align-items-center">
-                                        <span uk-icon="icon: hashtag"></span> 
-                                        <span><b>{{data.category}}</b></span>
+                </div>
+                <div class="col-md-8">
+                    <section>
+                        <section v-if="userIsLoaded" class="d-flex justify-content-between align-items-center">
+                            <div class="mr-3 text-secondary d-flex align-items-center"                                
+                                v-bind:class="{ 'hidden': !playing}" 
+                                style="opacity: 0.7;">
+                                <span>Music is playing</span>
+                                <i class="fas fa-spinner fa-spin ml-2"></i>
+                            </div>
+                            <section class="d-flex align-items-center">
+                                <div>    
+                                    <i v-if="playing" class="fas fa-pause mr-3 uk-text-secondary pointer" style="font-size: 20px;" @click="handler('MUSICCONTROL', { event: 'pause'})"></i>
+                                    <i v-if="!playing" class="fas fa-play mr-3 uk-text-secondary pointer" style="font-size: 20px;" @click="handler('MUSICCONTROL', { event: 'play'})"></i>
+                               </div>
+                            </section>
+                        </section>
+                        <section v-if="!userIsLoaded">
+                            <div class="spinner">
+                                <div class="bounce1"></div>
+                                <div class="bounce2"></div>
+                                <div class="bounce3"></div>
+                            </div>
+                        </section>
+                    </section>
+                    <iframe class="video" style="margin-top: 20px" id="profileVideo"  width="100%" loading="lazy"  src=""  frameborder="0" scrolling="no" allowfullscreen></iframe>
+                    <!-- Diaries -->
+                    <section v-if="contentIsReady">
+                        <div class="row justify-content-center">
+                            <div class="col-md-10">
+                                <div v-if="diaries.length > 0">
+                                    <div v-for="(data, index) in diaries" class="mt-4">
+                                        <div class="posts">
+                                            <h6 class="p-0 m-0">
+                                                <div class="d-flex align-items-center">
+                                                    <span uk-icon="icon: hashtag"></span> 
+                                                    <span><b>{{data.category}}</b></span>
+                                                </div>
+                                            </h6>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="text-secondary mr-2" style="font-size: 13px;"> 
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="fas fa-calendar-alt icon" ></i>
+                                                        <span>&nbsp;{{data.datePosted}}</span>
+                                                    </div>
+                                                </span>
+                                                <span uk-icon="icon: trash; ratio: 0.9" class="text-danger pointer" @click="handler('DELETEDIARY', { id: data.id })"></span>
+                                            </div>
+                                        </div>            
+                                        <p class="text-secondary content p-0 m-0 mt-1">{{data.content}}</p>
                                     </div>
-                                </h6>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="text-secondary mr-2" style="font-size: 13px;"> 
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-calendar-alt icon" ></i>
-                                            <span>&nbsp;{{data.datePosted}}</span>
-                                        </div>
-                                    </span>
-                                    <span uk-icon="icon: trash; ratio: 0.9" class="text-danger pointer" @click="handler('DELETEDIARY', { id: data.id })"></span>
                                 </div>
+                                <div v-else>
+                                    <h4 class="text-center mt-5 blockquote"><em>Oops! It sounds like you don't have any posts, <br>Do you wish to 
+                                        <b @click="redirect('createDiary')" class="pointer">write</b> your first diary?</em>
+                                    </h4>
+                                </div>
+                                <!-- Copy right -->
+                                <div style="margin-top: 100px"></div>
+                                <p class="text-center">&copy; KOLYA MADRIDANO</p>
                             </div>
-                            <div class="d-flex align-items-center  posted-by ml-3">
-                                <div class="text-secondary  ml-1">Posted by you</div>
-                            </div>
-                            <p class="text-secondary pl-2 pr-2 pt-3 content ">{{data.content}}</p>
                         </div>
+                    </section>
+                    <div  v-if="!contentIsReady" class="d-flex justify-content-center">
+                        <section class="mt-5">
+                            <div class="spinner">
+                                <div class="bounce1"></div>
+                                <div class="bounce2"></div>
+                                <div class="bounce3"></div>
+                            </div>
+                        </section>
                     </div>
-                    <div v-else>
-                        <h4 class="text-center mt-5 blockquote"><em>Oops! It sounds like you don't have any posts, <br>Do you wish to 
-                            <b @click="redirect('createDiary')" class="pointer">write</b> your first diary?</em>
-                        </h4>
-                    </div>
+                
+                </div>
+            </div>
 
-                    <div style="margin-top: 100px"></div>
-                    <p class="text-center">&copy; KOLYA MADRIDANO</p>
-                </section>
+            <div id="offcanvas-push" uk-offcanvas="mode: push; overlay: true;flip: true" >
+                <div class="uk-offcanvas-bar bg-secondary">
+                    <button class="uk-offcanvas-close" type="button" uk-close></button>
+                    <div style="margin-top: 150px;"></div>
+                    <h5 class="text-white font-weight-light pointer" @click="redirect('createDiary')">
+                        <div class="d-flex justify-content-start">
+                            <span>Write new diary&nbsp;</span>
+                            <span uk-icon="icon:file-edit; ratio: 0.9" class="mt-1"></span>
+                        </div>
+                    </h5>
+                    <h5 class="text-white font-weight-light pointer" @click="redirect('feed')">
+                        <div class="d-flex justify-content-start">
+                            <span>Feed&nbsp;</span>
+                            <span uk-icon="icon:rss; ratio: 0.9" class="mt-1"></span>
+                        </div>
+                    </h5>
+                    <h3 class="font-weight-light mt-5 mb-2 blockquote quote">"{{quoteOfTheDay}}"</h3>
+                    <h5 class="text-white font-weight-light pointer  mt-5" @click="redirect('updateProfile')">
+                        <div class="d-flex justify-content-start">
+                            <span>Account settings&nbsp;</span>
+                            <span uk-icon="icon:cog; ratio: 0.9" class="mt-1"></span>
+                        </div>
+                    </h5>
+                    <h5 class="text-white font-weight-light">
+                        <div class="d-flex justify-content-start pointer" @click="handler('LOGOUT', null)">
+                            <span>Sign-out&nbsp;</span>
+                            <span uk-icon="icon: sign-out; ratio: 0.9" class="mt-1"></span>
+                        </div>
+                    </h5>
+                </div>
+            </div>
+            <div class="row justify-content-center mt-3">
+                <div class="col-md-7">
+        
+             
+       
+         
+
 
                     <div id="snackbar" style="background: #34A853;">
                         <p class="p-3 m-0 font-weight-light">Uploaded successfully!</p>
@@ -286,17 +317,24 @@
                 playing: false,
                 youTubeVideoIsLoaded: true,
                 userIsLoaded: false,
-                contentIsReady: false
+                contentIsReady: false,
+                selectedAvatarIsActive: false
             },
             methods: {
+                handleChangeSelectAvatar: function() {
+                    this.selectedAvatarIsActive = true;
+                },
+                handleCancelUpload: function() {
+                    this.selectedAvatarIsActive = false;
+                },
                 redirect: function(type) {
                     switch(true) {
                         case type === "feed":
-                            return location.href = "feed.html";
+                            return location.href = "../src/page_feed.html";
                         case type === "createDiary":
-                            return location.href = "create-diary.html";
+                            return location.href = "../src/page_diary.html";
                         case type === "updateProfile":
-                            return location.href="../src/update-profile.html";
+                            return location.href="../src/page_update_profile.html";
                         default: 
                             return;
                     }
@@ -310,7 +348,6 @@
                         case type === "UPLOADTOCLOUD": 
                             this.uploadIsDisabled = true;
                             this.isUploading = true;
-                            const form = document.querySelector("form");
                             const files = document.querySelector("[type=file]").files;
                             const formData = new FormData();
                             for (let i = 0; i < files.length; i++) {
@@ -320,7 +357,7 @@
                                 axios.post(this.cloudinaryUrl, formData)
                                     .then(res => {
                                         this.uploadedBuffer = res.data;
-                                        console.log(res.data);
+                                        this.selectedAvatarIsActive = false;
                                         if(this.uploadedBuffer) {
                                             let payload = {
                                                 specialId: this.local.userId,
@@ -403,6 +440,7 @@
                                 await axios.get(this.baseUrl+`api/profile/findBySpecialId/${this.local?.userId}`)
                                     .then(res => {
                                         this.user = res.data[0];
+                                        console.log(this.user);
                                         document.title = this.user?.firstName + " " + this.user?.lastName;
                                         this.userIsLoaded = true;
                                     }).catch(err => console.log(err));
