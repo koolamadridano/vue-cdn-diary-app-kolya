@@ -152,6 +152,7 @@
                             </h5>
                         </div>
                     </div>
+             
                     <iframe class="video" style="margin-top: 20px" id="profileVideo"  width="100%" loading="lazy"  src=""  frameborder="0" scrolling="no" allowfullscreen></iframe>
                     <section v-if="!contentIsReady" style="margin-top: -50px;">
                         <div class="spinner">
@@ -161,10 +162,11 @@
                         </div>
                     </section>
                     <section v-if="contentIsReady">
-                    <section class="mt-2 d-flex justify-content-end">
-                        <button class="uk-button uk-button-default text-secondary" @click="redirect('createDiary')">Write new diary</button>
-                        <button class="uk-button uk-button-default text-secondary" @click="redirect('feed')">Feed</button>
-                    </section>
+                    <div class="d-flex align-items-center justify-content-end mt-3">
+                        <p class="text-secondary mr-3 p-0 m-0 pointer" @click="redirect('createDiary')">Write diary <i class="fas fa-edit"></i> </p>
+                        <p class="text-secondary p-0 m-0 mr-3 pointer" @click="redirect('feed')">Feed <i class="fas fa-rss"></i> </p>
+                    </div>
+
                     <section class="galleryHeaderSection mt-5">
                         <h1 class="font-weight-light text-center">
                             <div class="d-flex justify-content-center align-items-center">
@@ -427,12 +429,10 @@
                     this.handler("FETCHPROFILE").then(res => {
                         this.handler("MUSICCONTROL", { event: "play"})
                         this.handler("LOADYOUTUBEVIDEO");
-                        setTimeout(() => {
-                            this.handler("FETCHGALLERY");
-                            this.handler("FETCHDIARIES");
-                            this.handler("FETCHQUOTEOFTHEDAY");
-                            this.contentIsReady = true;
-                        }, 2000);
+                        this.handler("FETCHGALLERY");
+                        this.handler("FETCHDIARIES");
+                        this.handler("FETCHQUOTEOFTHEDAY");
+                        this.contentIsReady = true;
                     });
                 }
             },
