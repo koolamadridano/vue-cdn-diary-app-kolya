@@ -335,7 +335,7 @@
                 },
                 handleMusic: function(event) {
                     let video = document.getElementById("profileVideo");
-                        video?.contentWindow.postMessage('{"event":"command","func":"' + 'pauseVideo' + '","args":""}', '*');
+                        video.contentWindow.pauseVideo();
                         console.log(video);
                         if(audio) {
                         if(event == "playMusic"){
