@@ -151,7 +151,9 @@
                         </div>
                     </div>
                     <iframe class="video" style="margin-top: 50px" id="profileVideo"  width="100%"  src=""  frameborder="0" scrolling="no" allowfullscreen></iframe>
-                
+                    <section v-if="contentIsReady">
+                        
+                   
                     <section class="mt-5 d-flex justify-content-end">
                         <button class="uk-button uk-button-primary" @click="redirect('createDiary')">Write new diary</button>
                         <button class="uk-button uk-button-default" @click="redirect('feed')">Feed</button>
@@ -230,8 +232,11 @@
                             <b @click="redirect('createDiary')" class="pointer">write</b> your first diary?</em>
                         </h4>
                     </div>
+
                     <div style="margin-top: 100px"></div>
                     <p class="text-center">&copy; KOLYA MADRIDANO</p>
+                </section>
+
                     <div id="snackbar" style="background: #34A853;">
                         <p class="p-3 m-0 font-weight-light">Uploaded successfully!</p>
                     </div>
@@ -271,7 +276,8 @@
                 playMusic: true,
                 playing: false,
                 youTubeVideoIsLoaded: true,
-                userIsLoaded: false
+                userIsLoaded: false,
+                contentIsReady: false
             },
             methods: {
                 redirect: function(type) {
@@ -291,7 +297,7 @@
                         case type === "LOGOUT":
                             localStorage.removeItem('diaryLocalStorage');
                             location.href = "../index.html";
-                            break;
+                        break;
                         case type === "UPLOADTOCLOUD": 
                             this.uploadIsDisabled = true;
                             this.isUploading = true;
@@ -329,7 +335,7 @@
                                     })
                                     .catch(err => console.log(err))
                             }
-                            break;
+                        break;
                         case type === "MUSICCONTROL": 
                             let audio = document.getElementById("audio");
                             if(audio) {
@@ -346,7 +352,7 @@
                                     }
                                 }
                             }
-                            break;
+                        break;
                         case type === "DELETEDIARY":
                             axios.delete(this.baseUrl + `api/diary/remove/` + payload.id)
                                 .then(res => {
@@ -358,7 +364,7 @@
                                         }, 3000);
                                 })
                                 .catch(err => console.log(err))
-                            break;
+                        break;
                         case type === "DELETEIMG": 
                             axios.delete(this.baseUrl + `api/gallery/remove/${payload.ImgId}`)
                             .then(res => {
@@ -414,9 +420,12 @@
                     this.handler("FETCHPROFILE").then(res => {
                         this.handler("MUSICCONTROL", { event: "play"})
                         this.handler("LOADYOUTUBEVIDEO");
-                        this.handler("FETCHGALLERY");
-                        this.handler("FETCHDIARIES");
-                        this.handler("FETCHQUOTEOFTHEDAY");
+                        setTimeout(() => {
+                            this.handler("FETCHGALLERY");
+                            this.handler("FETCHDIARIES");
+                            this.handler("FETCHQUOTEOFTHEDAY");
+                            this.contentIsReady = true;
+                        }, 2000);
                     });
                 }
             },
